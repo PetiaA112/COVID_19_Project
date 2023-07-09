@@ -1,0 +1,49 @@
+COVID -19
+
+
+-- Countries with highest infection rate compared to population 
+SELECT Location, MAX(total_cases) AS Highest_infection_count, Population, MAX((total_cases/population)) * 100 AS Population_infected_percentage
+FROM `poetic-emblem-382918.Covid_19.Death`
+GROUP BY Location, Population
+ORDER BY Population_infected_percentage desc
+
+
+--Number of deaths by Continent
+SELECT continent, MAX(total_deaths) As Total_Death_Count
+FROM `poetic-emblem-382918.Covid_19.Death`
+WHERE Continent IS NOT NULL
+GROUP BY  continent
+ORDER BY  Total_Death_Count desc
+
+
+--Global Numbers of Total Cases / Total Deaths
+SELECT date, SUM(new_cases) AS Total_Cases, SUM(new_deaths) AS Total_Deaths, SUM(new_deaths)/SUM(new_cases) * 100 AS Death_percentage
+FROM `poetic-emblem-382918.Covid_19.Death`
+WHERE Continent IS NOT NULL
+GROUP BY date
+ORDER BY 1,2
+
+
+--Total Populations VS Vaccinations
+SELECT
+  dea.continent,
+  dea.location,
+  dea.date,
+  dea.population,
+  vac.new_vaccinations,
+  SUM(CAST(vac.new_vaccinations AS INT64)) OVER (PARTITION BY dea.location ORDER BY dea.date) AS RollingPeopleVaccinated
+FROM
+  `poetic-emblem-382918.Covid_19.Death` AS dea
+JOIN
+  `poetic-emblem-382918.Covid_19.Vaccination ` AS vac
+ON
+  dea.location = vac.location
+  AND dea.date = vac.date
+WHERE
+  dea.continent IS NOT NULL
+ORDER BY
+  dea.location, dea.date
+
+
+
+
